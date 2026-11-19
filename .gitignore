@@ -12,5 +12,9 @@ __pycache__/
 venv/
 .venv/
 
-# Ignore root temp media
-final_detailed_story_45s.mp4
+# Ignore root temp media & raw video renders
+*.mp4
+!content/**/*.mp4
+hybrid_clips/
+auth_url.txt
+
