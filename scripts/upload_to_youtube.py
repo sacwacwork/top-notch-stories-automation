@@ -22,15 +22,28 @@ def get_ist_now():
     return datetime.now(ist)
 
 def get_authenticated_service():
-    """Builds YouTube service using OAuth Refresh Token from Environment Variables."""
+    """Builds YouTube service using OAuth Refresh Token from Environment Variables or local youtube_credentials.json."""
     client_id = os.environ.get("YOUTUBE_CLIENT_ID")
     client_secret = os.environ.get("YOUTUBE_CLIENT_SECRET")
     refresh_token = os.environ.get("YOUTUBE_REFRESH_TOKEN")
 
     if not all([client_id, client_secret, refresh_token]):
+        # Check local credentials file
+        for cred_file in ["youtube_credentials.json", os.path.join(os.path.dirname(__file__), "..", "youtube_credentials.json")]:
+            if os.path.exists(cred_file):
+                try:
+                    with open(cred_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        client_id = client_id or data.get("client_id")
+                        client_secret = client_secret or data.get("client_secret")
+                        refresh_token = refresh_token or data.get("refresh_token")
+                except Exception:
+                    pass
+
+    if not all([client_id, client_secret, refresh_token]):
         raise ValueError(
-            "Missing environment variables! Please set YOUTUBE_CLIENT_ID, "
-            "YOUTUBE_CLIENT_SECRET, and YOUTUBE_REFRESH_TOKEN in GitHub Secrets."
+            "Missing credentials! Please set YOUTUBE_CLIENT_ID, "
+            "YOUTUBE_CLIENT_SECRET, and YOUTUBE_REFRESH_TOKEN in GitHub Secrets or youtube_credentials.json."
         )
 
     creds = Credentials(
