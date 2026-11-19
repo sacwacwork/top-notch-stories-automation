@@ -9,6 +9,7 @@ SCOPES = [
 ]
 
 CLIENT_SECRETS_FILE = "client_secrets.json"
+REPO = "sacwacwork/top-notch-stories-automation"
 
 def main():
     if not os.path.exists(CLIENT_SECRETS_FILE):
@@ -53,13 +54,13 @@ def main():
     print("SUCCESS! Refresh Token successfully praapt ho gaya!")
     print("="*60)
 
-    # Set GitHub Secrets automatically using GitHub CLI (gh)
-    print("\nSetting GitHub Repository Secrets automatically via gh CLI...")
+    # Set GitHub Secrets automatically for top-notch-stories-automation
+    print(f"\nSetting GitHub Secrets automatically on {REPO}...")
     try:
-        subprocess.run(["gh", "secret", "set", "YOUTUBE_CLIENT_ID", "--body", client_id], check=True)
-        subprocess.run(["gh", "secret", "set", "YOUTUBE_CLIENT_SECRET", "--body", client_secret], check=True)
-        subprocess.run(["gh", "secret", "set", "YOUTUBE_REFRESH_TOKEN", "--body", refresh_token], check=True)
-        print("ALL 3 SECRETS SUCCESSFULLY ADDED TO YOUR GITHUB REPO!")
+        subprocess.run(["gh", "secret", "set", "YOUTUBE_CLIENT_ID", "--repo", REPO, "--body", client_id], check=True)
+        subprocess.run(["gh", "secret", "set", "YOUTUBE_CLIENT_SECRET", "--repo", REPO, "--body", client_secret], check=True)
+        subprocess.run(["gh", "secret", "set", "YOUTUBE_REFRESH_TOKEN", "--repo", REPO, "--body", refresh_token], check=True)
+        print(f"ALL 3 SECRETS ADDED TO {REPO}!")
     except Exception as e:
         print(f"gh secret set warning: {e}")
         print("\nAap manually bhi add kar sakte hain:")
@@ -68,7 +69,7 @@ def main():
         print(f"YOUTUBE_REFRESH_TOKEN = {refresh_token}")
 
     print("\n" + "="*60)
-    print("SETUP COMPLETE! Ab GitHub Actions roz automatically videos upload kar sakega!")
+    print("SETUP COMPLETE! Ab Top Notch Stories channel ke liye auto-upload ready hai!")
     print("="*60 + "\n")
 
 if __name__ == "__main__":
