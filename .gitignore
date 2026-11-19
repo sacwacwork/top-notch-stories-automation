@@ -1,0 +1,16 @@
+# Secrets & Keys
+client_secrets.json
+token.json
+tokens.txt
+youtube_credentials.json
+.env
+*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Ignore root temp media
+final_detailed_story_45s.mp4

@@ -1,0 +1,75 @@
+name: Auto Upload YouTube Shorts
+
+on:
+  schedule:
+    # Morning Slot: 9:00 AM IST = 3:30 AM UTC
+    - cron: '30 3 * * *'
+    # Evening Slot: 6:00 PM IST = 12:30 PM UTC
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Select slot to upload'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - morning
+          - evening
+      folder:
+        description: 'Specific folder path (e.g. content/19-11-2026_evening)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt pytz
+
+      - name: Run YouTube Uploader
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          CMD="python scripts/upload_to_youtube.py"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.folder }}" ]; then
+              CMD="$CMD --folder '${{ github.event.inputs.folder }}'"
+            else
+              CMD="$CMD --slot '${{ github.event.inputs.slot }}'"
+            fi
+          fi
+          echo "Executing: $CMD"
+          eval $CMD
+
+      - name: Commit and Push Upload Flag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/*/uploaded.flag || true
+          if git diff --staged --quiet; then
+            echo "No new upload flags to commit."
+          else
+            git commit -m "chore: record automated youtube upload [skip ci]"
+            git push
+          fi
